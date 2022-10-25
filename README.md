@@ -1,0 +1,1 @@
+## workAPP es una app que permite gestionar proyectos de cualquier tipo, a los cuales podemos agregar tareas y colaboradores.
