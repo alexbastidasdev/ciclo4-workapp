@@ -1,45 +1,80 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import cors from 'cors';
-import conectarDB from './config/db.js';
-import usuarioRoutes from './routes/usuarioRoutes.js';
-import proyectoRoutes from './routes/proyectoRoutes.js';
-import tareaRoutes from './routes/tareaRoutes.js';
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import conectarDB from "./config/db.js";
+import usuarioRoutes from "./routes/usuarioRoutes.js";
+import proyectoRoutes from "./routes/proyectoRoutes.js";
+import tareaRoutes from "./routes/tareaRoutes.js";
 
 const app = express();
+app.use(express.json());
 
-app.use(express.json()); // Para poder leer los datos que el usuario coloque en el body que deben ser en formato JSON
+dotenv.config();
 
-dotenv.config(); 
-
-// Conectar a la base de datos
 conectarDB();
 
-// configurar cors
+// Configurar CORS
 const whitelist = [process.env.FRONTEND_URL];
+
 const corsOptions = {
-    origin: function (origin, callback) {
-        // origin es la url del cliente que hace la petición
-        // callback es una función que se ejecuta al final
-        if (whitelist.includes(origin)) {
-            // puede acceder a la api
-            callback(null, true); //null significa que no hay error y que se puede acceder
-        } else {
-            // no puede acceder a la api
-            callback(new Error("Error de CORS"));
-        }
-    },
+  origin: function (origin, callback) {
+    if (whitelist.includes(origin)) {
+      // Puede consultar la API
+      callback(null, true);
+    } else {
+      // No esta permitido
+      callback(new Error("Error de Cors"));
+    }
+  },
 };
 
 app.use(cors(corsOptions));
 
 // Routing
-app.use('/api/usuarios', usuarioRoutes);
-app.use('/api/proyectos', proyectoRoutes);
-app.use('/api/tareas', tareaRoutes);
-
+app.use("/api/usuarios", usuarioRoutes);
+app.use("/api/proyectos", proyectoRoutes);
+app.use("/api/tareas", tareaRoutes);
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => { // un call back es una funcion que se ejecuta cuando algo sucede
-    console.log(`Servidor funcionando en el puerto ${PORT}`);
+const servidor = app.listen(PORT, () => {
+  console.log(`Servidor corriendo en el puerto ${PORT}`);
+});
+
+// Socket.io
+import { Server } from "socket.io";
+
+const io = new Server(servidor, {
+  pingTimeout: 60000,
+  cors: {
+    origin: process.env.FRONTEND_URL,
+  },
+});
+
+io.on("connection", (socket) => {
+  // console.log("Conectado a socket.io");
+
+  // Definir los eventos de socket io
+  socket.on("abrir proyecto", (proyecto) => {
+    socket.join(proyecto);
+  });
+
+  socket.on("nueva tarea", (tarea) => {
+    const proyecto = tarea.proyecto;
+    socket.to(proyecto).emit("tarea agregada", tarea);
+  });
+
+  socket.on("eliminar tarea", (tarea) => {
+    const proyecto = tarea.proyecto;
+    socket.to(proyecto).emit("tarea eliminada", tarea);
+  });
+
+  socket.on("actualizar tarea", (tarea) => {
+    const proyecto = tarea.proyecto._id;
+    socket.to(proyecto).emit("tarea actualizada", tarea);
+  });
+
+  socket.on("cambiar estado", (tarea) => {
+    const proyecto = tarea.proyecto._id;
+    socket.to(proyecto).emit("nuevo estado", tarea);
+  });
 });

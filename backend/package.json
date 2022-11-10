@@ -12,7 +12,7 @@
     "MERN",
     "Node"
   ],
-  "author": "Alex",
+  "author": "Alex Bastidas",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.0.1",

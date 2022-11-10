@@ -1,60 +1,64 @@
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer";
 
 export const emailRegistro = async (datos) => {
-    const { email, nombre, token } = datos;
+  const { email, nombre, token } = datos;
 
-    const transport = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST,
-        port: process.env.EMAIL_PORT,
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        }
-      });
+  const transport = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port: process.env.EMAIL_PORT,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
 
-    // informacion del email
-    const info = await transport.sendMail({
-        from: '"workApp - Administrador de Proyectos" <cuentas@workapp.com>',
-        to: email,
-        subject: 'workApp - Confirma tu Cuenta',
-        text: 'Comprueba tu Cuenta en workApp',
-        html: `
-            <p>Hola: ${nombre}, Comprueba tu Cuenta en workApp</p>
-            <p>Tu Cuenta ya Está Casi Lista, Solo Debes Comprobarla Dando Click en el Siguiente Enlace:</p>
+  // Información del email
 
-            <a href="${process.env.FRONTEND_URL}/auth/confirmar/${token}">Comprobar Cuenta</a> 
+  const info = await transport.sendMail({
+    from: '"workApp - Administrador de Proyectos" <cuentas@workapp.com>',
+    to: email,
+    subject: "workApp - Comprueba tu cuenta",
+    text: "Comprueba tu cuenta en workApp",
+    html: `<p>Hola: ${nombre} Comprueba tu cuenta en workApp</p>
+    <p>Tu cuenta ya esta casi lista, solo debes comprobarla en el siguiente enlace: 
 
-            <p>Si tu no Creaste Esta Cuenta, Puedes Ignorar el Mensaje</p>
-        `,
-    });
+    <a href="${process.env.FRONTEND_URL}/confirmar/${token}">Comprobar Cuenta</a>
+    
+    <p>Si tu no creaste esta cuenta, puedes ignorar el mensaje</p>
+    
+    
+    `,
+  });
 };
 
 export const emailOlvidePassword = async (datos) => {
   const { email, nombre, token } = datos;
 
   const transport = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: process.env.EMAIL_PORT,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      }
-    });
+    host: process.env.EMAIL_HOST,
+    port: process.env.EMAIL_PORT,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
 
-  // informacion del email
+  // Información del email
+
   const info = await transport.sendMail({
-      from: '"workApp - Administrador de Proyectos" <cuentas@workapp.com>',
-      to: email,
-      subject: 'workApp - Reestablece tu Password',
-      text: 'Reestablece tu Password',
-      html: `<p>Hola: ${nombre}, Haz Solicitado Reestablecer tu Password</p>
+    from: '"workApp - Administrador de Proyectos" <cuentas@workapp.com>',
+    to: email,
+    subject: "workApp - Reestablece tu Password",
+    text: "Reestablece tu Password",
+    html: `<p>Hola: ${nombre} has solicitado reestablecer tu password</p>
 
-          <p>Sigue el Siguiente Enlace Para Generar un NUevo Password:</p>
+    <p>Sigue el siguiente enlace para generar un nuevo password: 
 
-          <a href="${process.env.FRONTEND_URL}/auth/olvide-password/${token}">Reestablecer Password</a> 
-
-          <p>Si tu no Solicitaste Este Email, Puedes Ignorar el Mensaje</p>
-      `,
+    <a href="${process.env.FRONTEND_URL}/olvide-password/${token}">Reestablecer Password</a>
+    
+    <p>Si tu no solicitaste este email, puedes ignorar el mensaje</p>
+    
+    
+    `,
   });
 };
-  
